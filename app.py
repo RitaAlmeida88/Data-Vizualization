@@ -1,85 +1,12 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[395]:
-
-
 import dash
-from dash import Dash, dcc, html
+import dash_core_components as dcc
+import dash_html_components as html
 from dash.dependencies import Input, Output
-
-
-# In[396]:
-
-
 import pandas as pd
-import numpy as np
-import seaborn as sns 
-import matplotlib.pyplot as plt
-import plotly.express as px
 import plotly.graph_objs as go
-from plotly.subplots import make_subplots
 
 
-# In[397]:
-
-
-df = pd.read_csv('C:\\Users\\Rita\Downloads\\US_Accidents_Dec21_updated.csv\\US_Accidents_Dec21_updated.csv')  # Substitua pelo caminho correto do arquivo CSV
-
-
-# In[399]:
-
-
-df["Start_Time"] = pd.to_datetime(df["Start_Time"])
-
-
-# In[400]:
-
-
-df["year"] = df["Start_Time"].dt.year
-
-
-# In[401]:
-
-
-df.info()
-
-
-# In[402]:
-
-
-df = df[df['year'] == 2016][['ID', 'City', 'Severity', 'Start_Time', 'Start_Lat', 'Start_Lng', 'State', 'Precipitation(in)', 'Weather_Condition', 'year']]
-
-
-# In[403]:
-
-
-df.info()
-
-
-# In[404]:
-
-
-df['year'].unique()
-
-
-# In[405]:
-
-
-df.count()
-
-
-# In[406]:
-
-
-df.to_csv ("accidents2016.csv", index=False)
-
-
-# In[407]:
-
-
-# Count the number of accidents per state
-state_counts = df["State"].value_counts()
+df = pd.read_csv('accidents2016.csv')
 
 # Create a bar chart
 fig1 = go.Figure(
@@ -89,13 +16,11 @@ fig1 = go.Figure(
 
 fig1.show()
 
-
 # In[408]:
 
 
 # Convert the Start_Time column to datetime format
 df["Start_Time"] = pd.to_datetime(df["Start_Time"])
-
 
 # Extract the hour of day
 df["Hour"] = df["Start_Time"].dt.hour
@@ -109,13 +34,11 @@ fig2 = go.Figure(
     layout=go.Layout(title="Accidents by Hour of Day")
 )
 
-
 # In[409]:
 
 
 # Extract the day of week and hour of day
 df["DayOfWeek"] = df["Start_Time"].dt.day_name()
-
 
 # Create a pivot table of accident counts by day of week and hour of day
 day_hour_counts = pd.pivot_table(df, values="ID", index="DayOfWeek", columns="Hour", aggfunc="count")
@@ -126,7 +49,6 @@ fig3 = go.Figure(
     layout=go.Layout(title="Accidents by Day of Week and Hour of Day")
 )
 
-
 # In[410]:
 
 
@@ -135,13 +57,12 @@ hour_count.columns = ['Hour', 'Count']
 
 fig4 = px.pie(hour_count, values='Count', names='Hour', title='Distribution of Accidents by Hour of Day')
 
-
 # In[411]:
 
 
 # agrupar os dados por dia e calcular a contagem de acidentes e a precipitação média
-daily_counts = df.groupby(df['Start_Time'].dt.date).agg({'ID':'count', 'Precipitation(in)':'mean'}).reset_index()
-daily_counts = daily_counts.rename(columns={'Start_Time':'Date', 'ID':'Accident_Count'})
+daily_counts = df.groupby(df['Start_Time'].dt.date).agg({'ID': 'count', 'Precipitation(in)': 'mean'}).reset_index()
+daily_counts = daily_counts.rename(columns={'Start_Time': 'Date', 'ID': 'Accident_Count'})
 
 # plotar um gráfico de dispersão da contagem de acidentes x precipitação média
 fig5 = px.scatter(daily_counts, x='Precipitation(in)', y='Accident_Count', trendline='ols')
@@ -162,67 +83,64 @@ def categorize_severity(x):
     else:
         return 'Desconhecida'
 
-df['Severity_cat'] = df['Severity'].apply(categorize_severity)
 
+df['Severity_cat'] = df['Severity'].apply(categorize_severity)
 
 # In[413]:
 
 
 df_state = df.groupby(['State', 'Severity_cat']).agg({'ID': 'count'}).reset_index()
 
-
 # In[414]:
 
 
-fig6 = px.scatter_geo(df_state, 
-                     locations='State', 
-                     color='Severity_cat', 
-                     size='ID', 
-                     locationmode='USA-states',
-                     size_max=50,
-                     scope='usa',
-                     hover_name='Severity_cat',
-                     projection='albers usa',
-                     title='Severidade dos Acidentes nos EUA por Estado')
-
+fig6 = px.scatter_geo(df_state,
+                      locations='State',
+                      color='Severity_cat',
+                      size='ID',
+                      locationmode='USA-states',
+                      size_max=50,
+                      scope='usa',
+                      hover_name='Severity_cat',
+                      projection='albers usa',
+                      title='Severidade dos Acidentes nos EUA por Estado')
 
 # In[415]:
 
 
 df_city = df.groupby(['City', 'Severity_cat']).agg({'ID': 'count'}).reset_index()
 
-
 # In[416]:
 
 
-fig7 = px.scatter(df_city, 
-                 x='City', 
-                 y='ID', 
-                 color='Severity_cat', 
-                 size='ID',
-                 size_max=50,
-                 hover_name='Severity_cat',
-                 title='Severidade dos Acidentes nos EUA por Cidade')
-
+fig7 = px.scatter(df_city,
+                  x='City',
+                  y='ID',
+                  color='Severity_cat',
+                  size='ID',
+                  size_max=50,
+                  hover_name='Severity_cat',
+                  title='Severidade dos Acidentes nos EUA por Cidade')
 
 # In[417]:
 
 
 df["Precipitation"] = df["Precipitation(in)"].apply(lambda x: "Yes" if x > 0 else "No")
 
-
 # In[418]:
 
 
-state_info = df.groupby("State").agg({"Severity": "count", "Precipitation": lambda x: sum(x == "Yes"), "ID": pd.Series.nunique}).reset_index()
+state_info = df.groupby("State").agg(
+    {"Severity": "count", "Precipitation": lambda x: sum(x == "Yes"), "ID": pd.Series.nunique}).reset_index()
 state_info = state_info.rename(columns={"ID": "Accident Count"})
-
 
 # In[419]:
 
 
-fig8 = px.scatter_geo(state_info, locations="State", locationmode="USA-states", color="Precipitation", size="Accident Count", hover_name="State", hover_data=["Severity", "Precipitation", "Accident Count"], scope="usa", title="US Accidents by State - Severity, Precipitation and Accident Count")
-
+fig8 = px.scatter_geo(state_info, locations="State", locationmode="USA-states", color="Precipitation",
+                      size="Accident Count", hover_name="State",
+                      hover_data=["Severity", "Precipitation", "Accident Count"], scope="usa",
+                      title="US Accidents by State - Severity, Precipitation and Accident Count")
 
 # In[420]:
 
@@ -251,23 +169,16 @@ fig9.update_layout(
     uniformtext_mode='hide'
 )
 
-
 # In[421]:
 
 
 # Define os dias da semana
 days_of_week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
-
 # In[ ]:
 
 
-import dash
-import dash_core_components as dcc
-import dash_html_components as html
-from dash.dependencies import Input, Output
-import plotly.graph_objects as go
-import plotly.express as px
+
 
 app = dash.Dash(__name__)
 
@@ -324,7 +235,7 @@ app.layout = html.Div(style=styles['container'], children=[
     html.H1("Análise de Acidentes", style=styles['header']),
     html.H2("Data visualization", style=styles['subtitle']),
     html.H3("Rita Almeida", style=styles['subtitle']),
-    
+
     html.Div(style=styles['graph-container'], children=[
         html.Div(style=styles['graph'], children=[
             dcc.Graph(id="fig1", figure=fig1)
@@ -377,6 +288,7 @@ app.layout = html.Div(style=styles['container'], children=[
     ])
 ])
 
+
 @app.callback(
     Output("fig2", "figure"),
     Input("day-dropdown-fig2", "value")
@@ -384,32 +296,36 @@ app.layout = html.Div(style=styles['container'], children=[
 def update_fig2(selected_day):
     # Filtra os dados pelo dia da semana selecionado
     filtered_df = df[df["Start_Time"].dt.day_name() == selected_day]
-    
+
     # Conta o número de acidentes por hora
     hour_counts = filtered_df["Hour"].value_counts().sort_index()
-    
+
     # Atualiza a figura fig2 com os dados filtrados
     fig = go.Figure(data=[go.Scatter(x=hour_counts.index, y=hour_counts.values, mode="lines")],
                     layout=go.Layout(title=f"Accidents by Hour of Day - {selected_day}"))
-    
+
     return fig
+
 
 @app.callback(
     Output("fig4", "figure"),
     Input("day-dropdown-fig4", "value")
 )
+
 def update_fig4(selected_day):
     # Filtra os dados pelo dia da semana selecionado
     filtered_df = df[df["Start_Time"].dt.day_name() == selected_day]
-    
+
     # Agrupa os dados por hora e calcula a contagem de acidentes por hora
     hour_counts = filtered_df.groupby('Hour')['ID'].count().reset_index()
     hour_counts.columns = ['Hour', 'Count']
-    
+
     # Atualiza a figura fig4 com os dados filtrados
-    fig = px.pie(hour_counts, values='Count', names='Hour', title=f'Distribution of Accidents by Hour of Day - {selected_day}')
-    
+    fig = px.pie(hour_counts, values='Count', names='Hour',
+                 title=f'Distribution of Accidents by Hour of Day - {selected_day}')
+
     return fig
+
 
 @app.callback(
     Output("fig7", "figure"),
@@ -418,22 +334,16 @@ def update_fig4(selected_day):
 def update_fig7(selected_month):
     # Filtra os dados pelo mês selecionado
     filtered_df = df[df["Start_Time"].dt.month_name() == selected_month]
-    
+
     # Conta o número de acidentes por dia
     day_counts = filtered_df["Start_Time"].dt.day.value_counts().sort_index()
-    
+
     # Atualiza a figura fig7 com os dados filtrados
     fig = go.Figure(data=[go.Scatter(x=day_counts.index, y=day_counts.values, mode="lines")],
                     layout=go.Layout(title=f"Accidents by Day of Month - {selected_month}"))
-    
+
     return fig
+
 
 if __name__ == '__main__':
     app.run_server(debug=False)
-
-
-# In[ ]:
-
-
-
-
