@@ -228,6 +228,7 @@ fig9.update_layout(
 
 # Define os dias da semana
 days_of_week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+months_of_year = ['January', 'February', 'March', 'April', 'May', 'June', 'Jully', 'August', 'September', 'October', 'November', 'December']
 
 
 # In[451]:
