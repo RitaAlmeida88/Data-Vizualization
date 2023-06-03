@@ -19,13 +19,36 @@ import matplotlib.pyplot as plt
 import plotly.express as px
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
-import statsmodels.api as sm
 
 
-# In[ ]:
+# In[428]:
 
 
-df = pd.read_csv('accidents2016.csv')
+df = pd.read_csv('C:\\Users\\Rita\Downloads\\US_Accidents_Dec21_updated.csv\\US_Accidents_Dec21_updated.csv')  # Substitua pelo caminho correto do arquivo CSV
+
+
+# In[429]:
+
+
+df["Start_Time"] = pd.to_datetime(df["Start_Time"])
+
+
+# In[430]:
+
+
+df["year"] = df["Start_Time"].dt.year
+
+
+# In[431]:
+
+
+df.info()
+
+
+# In[432]:
+
+
+df = df[df['year'] == 2016][['ID', 'City', 'Severity', 'Start_Time', 'Start_Lat', 'Start_Lng', 'State', 'Precipitation(in)', 'Weather_Condition', 'year']]
 
 
 # In[433]:
@@ -40,13 +63,19 @@ df.info()
 df['year'].unique()
 
 
-# In[434]:
+# In[405]:
 
 
 df.count()
 
 
-# In[436]:
+# In[406]:
+
+
+df.to_csv ("accidents2016.csv", index=False)
+
+
+# In[407]:
 
 
 # Count the number of accidents per state
@@ -61,7 +90,7 @@ fig1 = go.Figure(
 fig1.show()
 
 
-# In[437]:
+# In[408]:
 
 
 # Convert the Start_Time column to datetime format
@@ -81,7 +110,7 @@ fig2 = go.Figure(
 )
 
 
-# In[438]:
+# In[409]:
 
 
 # Extract the day of week and hour of day
@@ -98,7 +127,7 @@ fig3 = go.Figure(
 )
 
 
-# In[439]:
+# In[410]:
 
 
 hour_count = df.groupby('Hour')['ID'].count().reset_index()
@@ -107,7 +136,7 @@ hour_count.columns = ['Hour', 'Count']
 fig4 = px.pie(hour_count, values='Count', names='Hour', title='Distribution of Accidents by Hour of Day')
 
 
-# In[440]:
+# In[411]:
 
 
 # agrupar os dados por dia e calcular a contagem de acidentes e a precipitação média
@@ -118,7 +147,7 @@ daily_counts = daily_counts.rename(columns={'Start_Time':'Date', 'ID':'Accident_
 fig5 = px.scatter(daily_counts, x='Precipitation(in)', y='Accident_Count', trendline='ols')
 
 
-# In[441]:
+# In[412]:
 
 
 def categorize_severity(x):
@@ -136,13 +165,13 @@ def categorize_severity(x):
 df['Severity_cat'] = df['Severity'].apply(categorize_severity)
 
 
-# In[442]:
+# In[413]:
 
 
 df_state = df.groupby(['State', 'Severity_cat']).agg({'ID': 'count'}).reset_index()
 
 
-# In[443]:
+# In[414]:
 
 
 fig6 = px.scatter_geo(df_state, 
@@ -157,13 +186,13 @@ fig6 = px.scatter_geo(df_state,
                      title='Severidade dos Acidentes nos EUA por Estado')
 
 
-# In[444]:
+# In[415]:
 
 
 df_city = df.groupby(['City', 'Severity_cat']).agg({'ID': 'count'}).reset_index()
 
 
-# In[445]:
+# In[416]:
 
 
 fig7 = px.scatter(df_city, 
@@ -176,26 +205,26 @@ fig7 = px.scatter(df_city,
                  title='Severidade dos Acidentes nos EUA por Cidade')
 
 
-# In[446]:
+# In[417]:
 
 
 df["Precipitation"] = df["Precipitation(in)"].apply(lambda x: "Yes" if x > 0 else "No")
 
 
-# In[447]:
+# In[418]:
 
 
 state_info = df.groupby("State").agg({"Severity": "count", "Precipitation": lambda x: sum(x == "Yes"), "ID": pd.Series.nunique}).reset_index()
 state_info = state_info.rename(columns={"ID": "Accident Count"})
 
 
-# In[448]:
+# In[419]:
 
 
 fig8 = px.scatter_geo(state_info, locations="State", locationmode="USA-states", color="Precipitation", size="Accident Count", hover_name="State", hover_data=["Severity", "Precipitation", "Accident Count"], scope="usa", title="US Accidents by State - Severity, Precipitation and Accident Count")
 
 
-# In[449]:
+# In[420]:
 
 
 grouped = df.groupby("Weather_Condition")["ID"].count().reset_index(name="count")
@@ -223,15 +252,15 @@ fig9.update_layout(
 )
 
 
-# In[450]:
+# In[421]:
 
 
 # Define os dias da semana
 days_of_week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-months_of_year = ['January', 'February', 'March', 'April', 'May', 'June', 'Jully', 'August', 'September', 'October', 'November', 'December']
+months_of_year = ['January', 'Febreuary', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
 
-# In[451]:
+# In[422]:
 
 
 import dash
@@ -241,7 +270,8 @@ from dash.dependencies import Input, Output
 import plotly.graph_objects as go
 import plotly.express as px
 
-app = dash.Dash(__name__)
+app = dash.Dash(__name__, assets_folder='Assets')
+server = app.server
 
 # Estilos CSS personalizados
 styles = {
