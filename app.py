@@ -21,6 +21,12 @@ import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 
 
+# In[ ]:
+
+
+df = pd.read_csv('accidents2016.csv')
+
+
 # In[433]:
 
 
