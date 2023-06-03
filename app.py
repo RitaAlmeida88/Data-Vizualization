@@ -9,6 +9,9 @@ import plotly.graph_objs as go
 df = pd.read_csv('accidents2016.csv')
 
 # Create a bar chart
+
+state_counts = df["State"].value_counts()
+
 fig1 = go.Figure(
     data=[go.Bar(x=state_counts.index, y=state_counts.values)],
     layout=go.Layout(title="Accidents per State")
