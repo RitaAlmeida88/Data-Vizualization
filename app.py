@@ -123,15 +123,15 @@ fig5 = px.scatter(daily_counts, x='Precipitation(in)', y='Accident_Count', trend
 
 def categorize_severity(x):
     if x == 1:
-        return 'Mínima'
+        return 'Minim'
     elif x == 2:
-        return 'Moderada'
+        return 'Moderate'
     elif x == 3:
-        return 'Grave'
+        return 'Serious'
     elif x == 4:
-        return 'Muito Grave'
+        return 'Very Serious'
     else:
-        return 'Desconhecida'
+        return 'Unknown'
 
 df['Severity_cat'] = df['Severity'].apply(categorize_severity)
 
@@ -154,7 +154,7 @@ fig6 = px.scatter_geo(df_state,
                      scope='usa',
                      hover_name='Severity_cat',
                      projection='albers usa',
-                     title='Severidade dos Acidentes nos EUA por Estado')
+                     title='U.S. Accident Severity by State')
 
 
 # In[444]:
@@ -173,7 +173,7 @@ fig7 = px.scatter(df_city,
                  size='ID',
                  size_max=50,
                  hover_name='Severity_cat',
-                 title='Severidade dos Acidentes nos EUA por Cidade')
+                 title='U.S. Accident Severity by City')
 
 
 # In[446]:
@@ -213,9 +213,9 @@ fig9.add_trace(go.Bar(
 
 # Configurar o layout do gráfico
 fig9.update_layout(
-    title="Número de Acidentes por Estado do Tempo",
-    xaxis_title="Estado do Tempo",
-    yaxis_title="Número de Acidentes",
+    title="Number of Accidents by Weather State",
+    xaxis_title="Weather State",
+    yaxis_title="Number of Accidents",
     barmode="stack",
     bargap=0.1,
     uniformtext_minsize=8,
@@ -294,7 +294,7 @@ styles = {
 
 # Layout do painel
 app.layout = html.Div(style=styles['container'], children=[
-    html.H1("Análise de Acidentes", style=styles['header']),
+    html.H1("Accidents in the U.S. in 2016", style=styles['header']),
     html.H2("Data visualization", style=styles['subtitle']),
     html.H3("Rita Almeida", style=styles['subtitle']),
     
