@@ -241,7 +241,7 @@ from dash.dependencies import Input, Output
 import plotly.graph_objects as go
 import plotly.express as px
 
-app = dash.Dash(__name__, assets_folder='Assets')
+app = dash.Dash(__name__)
 server = app.server
 
 # Estilos CSS personalizados
@@ -402,7 +402,7 @@ def update_fig7(selected_month):
     return fig
 
 if __name__ == '__main__':
-    app.run_server(debug=False)
+    app.run_server(debug=True)
 
 
 # In[ ]:
